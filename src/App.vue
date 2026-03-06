@@ -4,6 +4,8 @@ import { appConfig } from "./config/appConfig";
 import { parseArenaDecklist } from "./lib/decklistParser";
 import { resolveDeckEntries, type ResolveDeckResult } from "./lib/cardResolver";
 import { ScryfallClient } from "./lib/scryfallClient";
+import { downloadPdf, generateProxyPdfBytes } from "./lib/pdfGenerator";
+import type { LayoutMode } from "./lib/pdfLayout";
 
 const exampleDecklist = `Deck
 4 Lightning Strike (M19) 152
@@ -19,6 +21,10 @@ const scryfallClient = new ScryfallClient();
 const resolveResult = ref<ResolveDeckResult | null>(null);
 const resolveError = ref<string | null>(null);
 const isResolving = ref(false);
+const layoutMode = ref<LayoutMode>("exact_63x88");
+const isGeneratingPdf = ref(false);
+const pdfStatus = ref<string | null>(null);
+const pdfError = ref<string | null>(null);
 
 async function resolveFromScryfall(): Promise<void> {
   if (parsed.value.entries.length === 0) {
@@ -42,6 +48,39 @@ async function resolveFromScryfall(): Promise<void> {
     resolveError.value = message;
   } finally {
     isResolving.value = false;
+  }
+}
+
+const canGeneratePdf = computed(
+  () => Boolean(resolveResult.value && resolveResult.value.resolved.length > 0)
+);
+
+async function generatePdf(): Promise<void> {
+  if (!resolveResult.value || resolveResult.value.resolved.length === 0) {
+    pdfError.value = "Resolve cards first before generating a PDF.";
+    return;
+  }
+
+  isGeneratingPdf.value = true;
+  pdfError.value = null;
+  pdfStatus.value = "Preparing printable card list...";
+
+  try {
+    const pdfBytes = await generateProxyPdfBytes(resolveResult.value.resolved, {
+      layoutMode: layoutMode.value,
+      onProgress: (current, total) => {
+        pdfStatus.value = `Embedding card images: ${current}/${total}`;
+      }
+    });
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const modeSuffix = layoutMode.value === "tight_margin" ? "tight" : "exact";
+    downloadPdf(pdfBytes, `manaschmiede-proxies-${modeSuffix}-${timestamp}.pdf`);
+    pdfStatus.value = "PDF generated and download started.";
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown PDF generation error.";
+    pdfError.value = message;
+  } finally {
+    isGeneratingPdf.value = false;
   }
 }
 </script>
@@ -127,6 +166,23 @@ async function resolveFromScryfall(): Promise<void> {
           </li>
         </ul>
       </div>
+
+      <h2 class="section-title">PDF Generation (Phase 4)</h2>
+      <label for="layout-mode" class="section-title">Layout mode</label>
+      <select id="layout-mode" v-model="layoutMode" class="layout-select">
+        <option value="exact_63x88">Exact 63 x 88 mm (recommended)</option>
+        <option value="tight_margin">Tight margins (slightly larger cards)</option>
+      </select>
+      <button
+        id="generate-pdf-button"
+        class="primary-button"
+        :disabled="isGeneratingPdf || !canGeneratePdf"
+        @click="generatePdf"
+      >
+        {{ isGeneratingPdf ? "Generating PDF..." : "Generate Printable A4 PDF" }}
+      </button>
+      <p v-if="pdfStatus" class="meta-line">{{ pdfStatus }}</p>
+      <p v-if="pdfError" class="error-text">{{ pdfError }}</p>
     </section>
   </main>
 </template>

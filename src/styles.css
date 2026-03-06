@@ -60,6 +60,15 @@ h1 {
   resize: vertical;
 }
 
+.layout-select {
+  width: 100%;
+  padding: 0.55rem;
+  border-radius: 10px;
+  border: 1px solid #b3c3d2;
+  background: #f8fbff;
+  margin-bottom: 0.75rem;
+}
+
 .table-wrapper {
   overflow-x: auto;
 }

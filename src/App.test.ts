@@ -16,4 +16,9 @@ describe("App", () => {
     const wrapper = mount(App);
     expect(wrapper.find("#resolve-scryfall-button").exists()).toBe(true);
   });
+
+  it("renders the pdf generation button", () => {
+    const wrapper = mount(App);
+    expect(wrapper.find("#generate-pdf-button").exists()).toBe(true);
+  });
 });

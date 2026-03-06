@@ -8,6 +8,7 @@ Last updated: March 6, 2026
 - Phase 1: completed (scaffold, lint/test baseline, config, and runtime checks completed).
 - Phase 2: completed (Arena parser, diagnostics, tests, and parser preview UI implemented).
 - Phase 3: completed (Scryfall client, resolver strategy, retry/throttling/cache, and UI integration).
+- Phase 4: completed (A4 layout math, 3x3 page packing, multi-page PDF generation, and download flow).
 
 ## Phase 0 - Decisions
 - Confirm language fallback behavior (`strict_de` vs `fallback_en`).
@@ -65,6 +66,14 @@ Exit criteria:
 - Implement A4 layout math.
 - Render 3x3 card grid pages.
 - Support multi-page output and download.
+
+Progress:
+- Done: layout math module with exact and tight-margin modes in `src/lib/pdfLayout.ts`.
+- Done: PDF generator with image embedding and page-slot placement in `src/lib/pdfGenerator.ts`.
+- Done: support for double-faced cards and quantity expansion in printable card list generation.
+- Done: browser download helper for generated PDF bytes.
+- Done: UI integration for layout selection + PDF generation in `src/App.vue`.
+- Done: tests in `src/lib/pdfLayout.test.ts` and `src/lib/pdfGenerator.test.ts`.
 
 Exit criteria:
 - Generated PDF has correct card dimensions and page packing.

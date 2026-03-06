@@ -32,6 +32,12 @@ Phase 3 completed:
 - Card resolver strategy: set/collector lookup first, newest-print name search fallback, German to English fallback.
 - Resolution UI section with unresolved-card reporting.
 
+Phase 4 completed:
+- A4 3x3 layout engine with exact and tight-margin modes.
+- Multi-page PDF generation from resolved card images.
+- Quantity expansion and double-faced card handling in printable output.
+- One-click browser download of generated PDF.
+
 ## Local Development
 Prerequisite: Node.js 20+ (includes `npm`).
 
