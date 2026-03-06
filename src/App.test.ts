@@ -11,4 +11,9 @@ describe("App", () => {
     const wrapper = mount(App);
     expect(wrapper.find("#decklist-input").exists()).toBe(true);
   });
+
+  it("renders the scryfall resolve button", () => {
+    const wrapper = mount(App);
+    expect(wrapper.find("#resolve-scryfall-button").exists()).toBe(true);
+  });
 });

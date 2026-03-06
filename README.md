@@ -27,6 +27,11 @@ Phase 2 completed:
 - Parser test suite for valid and malformed Arena decklist lines.
 - Parser preview UI in `App.vue` with live parsed entries and diagnostics.
 
+Phase 3 completed:
+- Scryfall API client with request throttling, retry-on-429/5xx, and in-memory GET cache.
+- Card resolver strategy: set/collector lookup first, newest-print name search fallback, German to English fallback.
+- Resolution UI section with unresolved-card reporting.
+
 ## Local Development
 Prerequisite: Node.js 20+ (includes `npm`).
 
@@ -51,4 +56,4 @@ Note: in browsers, `User-Agent` is controlled by the runtime and cannot be manua
 - `getting-started-with-vue.md`: local setup and run guide for Vue.
 
 ## Date Of This Snapshot
-This documentation was updated on March 5, 2026.
+This documentation was updated on March 6, 2026.

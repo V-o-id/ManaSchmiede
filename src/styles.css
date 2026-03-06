@@ -93,6 +93,25 @@ thead th {
   padding-left: 1.2rem;
 }
 
+.primary-button {
+  padding: 0.6rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid #2a5f93;
+  background: #2f75b7;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.error-text {
+  color: #9f1f1f;
+}
+
 @media (max-width: 700px) {
   .card {
     padding: 1rem;

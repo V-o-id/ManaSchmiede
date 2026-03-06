@@ -1,12 +1,13 @@
 ﻿# Implementation Plan
 
 Date created: February 19, 2026
-Last updated: March 5, 2026
+Last updated: March 6, 2026
 
 ## Status Snapshot
 - Phase 0: completed (decisions captured in `docs/OPEN_QUESTIONS.md`).
 - Phase 1: completed (scaffold, lint/test baseline, config, and runtime checks completed).
 - Phase 2: completed (Arena parser, diagnostics, tests, and parser preview UI implemented).
+- Phase 3: completed (Scryfall client, resolver strategy, retry/throttling/cache, and UI integration).
 
 ## Phase 0 - Decisions
 - Confirm language fallback behavior (`strict_de` vs `fallback_en`).
@@ -49,6 +50,13 @@ Exit criteria:
 - Implement API client with required headers.
 - Add resolver logic (specific print first, then search fallback).
 - Add request throttling, retry-on-429, and local cache.
+
+Progress:
+- Done: typed Scryfall API data models in `src/lib/scryfallTypes.ts`.
+- Done: Scryfall client with GET cache, request queue, throttling, and retry logic in `src/lib/scryfallClient.ts`.
+- Done: resolver pipeline (set/collector first, newest-print search, German to English fallback) in `src/lib/cardResolver.ts`.
+- Done: unit tests for client and resolver in `src/lib/scryfallClient.test.ts` and `src/lib/cardResolver.test.ts`.
+- Done: Vue UI integration with manual \"Resolve Cards via Scryfall\" flow in `src/App.vue`.
 
 Exit criteria:
 - Sample decklist resolves cards reliably.
