@@ -46,7 +46,12 @@ export class ScryfallClient {
   private lastRequestTime = 0;
 
   constructor(options: ScryfallClientOptions = {}) {
-    this.fetchFn = options.fetchFn ?? fetch;
+    const runtimeFetch = options.fetchFn ?? globalThis.fetch?.bind(globalThis);
+    if (!runtimeFetch) {
+      throw new Error("No fetch implementation available.");
+    }
+
+    this.fetchFn = runtimeFetch;
     this.baseUrl = (options.baseUrl ?? "https://api.scryfall.com").replace(/\/$/, "");
     this.minDelayMs = options.minDelayMs ?? 110;
     this.maxRetries = options.maxRetries ?? 2;
@@ -143,4 +148,3 @@ export class ScryfallClient {
     return run;
   }
 }
-

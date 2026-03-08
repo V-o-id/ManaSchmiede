@@ -62,5 +62,30 @@ describe("ScryfallClient", () => {
       ScryfallApiError
     );
   });
-});
 
+  it("binds global fetch to the runtime object when no custom fetchFn is provided", async () => {
+    const originalFetch = globalThis.fetch;
+    const mockFetch = vi.fn(function (this: unknown) {
+      expect(this).toBe(globalThis);
+      return Promise.resolve(createResponse(createCard()));
+    });
+
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      writable: true,
+      value: mockFetch
+    });
+
+    try {
+      const client = new ScryfallClient({ minDelayMs: 0 });
+      await client.getCardBySetCollector("XLN", "65", "de");
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    } finally {
+      Object.defineProperty(globalThis, "fetch", {
+        configurable: true,
+        writable: true,
+        value: originalFetch
+      });
+    }
+  });
+});
