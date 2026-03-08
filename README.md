@@ -38,6 +38,11 @@ Phase 4 completed:
 - Quantity expansion and double-faced card handling in printable output.
 - One-click browser download of generated PDF.
 
+Phase 5 completed:
+- Options panel for sideboard inclusion, fallback mode, and layout selection.
+- Resolve progress indicator and richer unresolved-card summaries.
+- Print instructions section for reliable 100% scale output.
+
 ## Local Development
 Prerequisite: Node.js 20+ (includes `npm`).
 

@@ -9,6 +9,7 @@ Last updated: March 6, 2026
 - Phase 2: completed (Arena parser, diagnostics, tests, and parser preview UI implemented).
 - Phase 3: completed (Scryfall client, resolver strategy, retry/throttling/cache, and UI integration).
 - Phase 4: completed (A4 layout math, 3x3 page packing, multi-page PDF generation, and download flow).
+- Phase 5: completed (options panel, progress indicators, unresolved summary, and print instructions).
 
 ## Phase 0 - Decisions
 - Confirm language fallback behavior (`strict_de` vs `fallback_en`).
@@ -82,6 +83,13 @@ Exit criteria:
 - Add progress UI and unresolved-card summary.
 - Add print instructions (100% scale, no fit-to-page).
 - Add options panel.
+
+Progress:
+- Done: options panel in `src/App.vue` for sideboard inclusion, fallback behavior, and layout mode.
+- Done: resolve progress indicator via `onProgress` callback in `src/lib/cardResolver.ts`.
+- Done: unresolved summary metrics and reason aggregation table in `src/App.vue`.
+- Done: print instructions section emphasizing 100% scale and no fit-to-page.
+- Done: additional UI tests in `src/App.test.ts` and resolver progress test in `src/lib/cardResolver.test.ts`.
 
 Exit criteria:
 - End-to-end flow works from paste to download.

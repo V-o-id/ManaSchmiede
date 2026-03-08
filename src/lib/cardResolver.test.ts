@@ -105,5 +105,18 @@ describe("resolveDeckEntries", () => {
     expect(result.resolved).toHaveLength(2);
     expect(getCardBySetCollector).toHaveBeenCalledTimes(1);
   });
-});
 
+  it("emits progress callbacks for every processed entry", async () => {
+    const getCardBySetCollector = vi.fn().mockResolvedValue(createCard({ lang: "de" }));
+    const searchNewestPrintByName = vi.fn().mockResolvedValue(null);
+    const client: CardLookupClient = { getCardBySetCollector, searchNewestPrintByName };
+    const onProgress = vi.fn();
+
+    const first = createDeckEntry({ line: 1 });
+    const second = createDeckEntry({ line: 2, rawLine: "1 Opt (XLN) 65" });
+    await resolveDeckEntries([first, second], { client, onProgress });
+
+    expect(onProgress).toHaveBeenCalledTimes(2);
+    expect(onProgress).toHaveBeenLastCalledWith(2, 2, second);
+  });
+});

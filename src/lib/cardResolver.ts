@@ -12,6 +12,7 @@ export interface ResolveDeckOptions {
   preferredLanguage?: string;
   fallbackLanguage?: string;
   fallbackMode?: "fallback_en" | "strict_de";
+  onProgress?: (current: number, total: number, entry: DeckEntry) => void;
 }
 
 export interface ResolvedCard {
@@ -161,6 +162,8 @@ export async function resolveDeckEntries(
   const preferredLanguage = options.preferredLanguage ?? "de";
   const fallbackLanguage = options.fallbackLanguage ?? "en";
   const fallbackMode = options.fallbackMode ?? "fallback_en";
+  const onProgress = options.onProgress;
+  let progressCurrent = 0;
 
   const uniqueResolutionPromises = new Map<
     string,
@@ -176,6 +179,8 @@ export async function resolveDeckEntries(
       const existing = uniqueResolutionPromises.get(key);
       if (existing) {
         const resolvedResult = await existing;
+        progressCurrent += 1;
+        onProgress?.(progressCurrent, entries.length, entry);
         if (resolvedResult.resolved) {
           return {
             resolved: {
@@ -202,7 +207,10 @@ export async function resolveDeckEntries(
         fallbackMode
       );
       uniqueResolutionPromises.set(key, promise);
-      return promise;
+      const result = await promise;
+      progressCurrent += 1;
+      onProgress?.(progressCurrent, entries.length, entry);
+      return result;
     })
   );
 
@@ -229,4 +237,3 @@ export async function resolveDeckEntries(
     fallbackToEnglishCount
   };
 }
-
