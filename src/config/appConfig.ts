@@ -1,6 +1,6 @@
 const DEFAULT_APP_NAME = "ManaSchmiede";
 const DEFAULT_APP_VERSION = "0.1.0-dev";
-const DEFAULT_REPOSITORY_URL = "https://github.com/your-user-or-org/ManaSchmiede";
+const DEFAULT_REPOSITORY_URL = "https://github.com/V-o-id/ManaSchmiede";
 
 function resolveScryfallUserAgent(appName: string, appVersion: string, repositoryUrl: string): string {
   return `${appName}/${appVersion} (+${repositoryUrl})`;
@@ -15,4 +15,3 @@ export const appConfig = {
 export const scryfallClientIdentity =
   import.meta.env.VITE_SCRYFALL_USER_AGENT ??
   resolveScryfallUserAgent(appConfig.name, appConfig.version, appConfig.repositoryUrl);
-

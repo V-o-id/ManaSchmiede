@@ -42,7 +42,7 @@ function messageFromError(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  return "Unknown error.";
+  return "Unbekannter Fehler.";
 }
 
 async function tryResolveBySetCollector(
@@ -136,7 +136,7 @@ async function resolveSingleEntry(
       return {
         unresolved: {
           entry,
-          reason: `Request failed: ${messageFromError(error)}`,
+          reason: `Anfrage fehlgeschlagen: ${messageFromError(error)}`,
           attempts
         },
         usedFallback
@@ -147,7 +147,7 @@ async function resolveSingleEntry(
   return {
     unresolved: {
       entry,
-      reason: "No matching Scryfall print found for configured language strategy.",
+      reason: "Kein passender Scryfall-Druck fuer die gewaehlte Sprachstrategie gefunden.",
       attempts
     },
     usedFallback

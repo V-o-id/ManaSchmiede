@@ -65,7 +65,7 @@ export function parseArenaDecklist(input: string): ParsedDecklist {
         line,
         rawLine,
         code: "invalid_line",
-        message: "Line does not match Arena deck format."
+        message: "Die Zeile entspricht nicht dem Arena-Decklistenformat."
       });
       return;
     }
@@ -76,7 +76,7 @@ export function parseArenaDecklist(input: string): ParsedDecklist {
         line,
         rawLine,
         code: "invalid_quantity",
-        message: "Card quantity must be at least 1."
+        message: "Die Kartenanzahl muss mindestens 1 sein."
       });
       return;
     }
@@ -87,7 +87,7 @@ export function parseArenaDecklist(input: string): ParsedDecklist {
         line,
         rawLine,
         code: "empty_name",
-        message: "Card name is missing."
+        message: "Der Kartenname fehlt."
       });
       return;
     }
@@ -111,4 +111,3 @@ export function parseArenaDecklist(input: string): ParsedDecklist {
     totalCards
   };
 }
-

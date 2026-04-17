@@ -78,7 +78,7 @@ async function embedRemoteImage(
 ): Promise<PDFImage> {
   const response = await fetchFn(imageUrl);
   if (!response.ok) {
-    throw new Error(`Image download failed with status ${response.status}`);
+    throw new Error(`Bilddownload mit Status ${response.status} fehlgeschlagen`);
   }
 
   const bytes = await response.arrayBuffer();
@@ -99,7 +99,7 @@ export async function generateProxyPdfBytes(
 ): Promise<Uint8Array> {
   const printableItems = buildPrintableImageList(resolvedCards);
   if (printableItems.length === 0) {
-    throw new Error("No printable images available for PDF generation.");
+    throw new Error("Keine druckbaren Bilder fuer die PDF-Erzeugung verfuegbar.");
   }
 
   const layout = createNineUpLayout(options.layoutMode ?? DEFAULT_LAYOUT_MODE);

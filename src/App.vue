@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { appConfig } from "./config/appConfig";
-import { parseArenaDecklist } from "./lib/decklistParser";
+import { parseArenaDecklist, type DeckSection } from "./lib/decklistParser";
 import { resolveDeckEntries, type ResolveDeckResult } from "./lib/cardResolver";
 import { ScryfallClient } from "./lib/scryfallClient";
 import { downloadPdf, generateProxyPdfBytes } from "./lib/pdfGenerator";
@@ -28,6 +28,19 @@ const layoutMode = ref<LayoutMode>("exact_63x88");
 const isGeneratingPdf = ref(false);
 const pdfStatus = ref<string | null>(null);
 const pdfError = ref<string | null>(null);
+
+function sectionLabel(section: DeckSection): string {
+  switch (section) {
+    case "deck":
+      return "Hauptdeck";
+    case "sideboard":
+      return "Sideboard";
+    case "commander":
+      return "Commander";
+    case "companion":
+      return "Companion";
+  }
+}
 
 const entriesForLookup = computed(() =>
   parsed.value.entries.filter((entry) => includeSideboard.value || entry.section !== "sideboard")
@@ -73,7 +86,7 @@ watch([decklistText, includeSideboard, fallbackMode], () => {
 async function resolveFromScryfall(): Promise<void> {
   if (entriesForLookup.value.length === 0) {
     resolveResult.value = null;
-    resolveError.value = "No valid entries available for lookup.";
+    resolveError.value = "Keine gueltigen Eintraege fuer die Suche vorhanden.";
     return;
   }
 
@@ -92,7 +105,7 @@ async function resolveFromScryfall(): Promise<void> {
       }
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown Scryfall error.";
+    const message = error instanceof Error ? error.message : "Unbekannter Scryfall-Fehler.";
     resolveError.value = message;
   } finally {
     isResolving.value = false;
@@ -105,27 +118,27 @@ const canGeneratePdf = computed(
 
 async function generatePdf(): Promise<void> {
   if (!resolveResult.value || resolveResult.value.resolved.length === 0) {
-    pdfError.value = "Resolve cards first before generating a PDF.";
+    pdfError.value = "Loese zuerst Karten auf, bevor du ein PDF erzeugst.";
     return;
   }
 
   isGeneratingPdf.value = true;
   pdfError.value = null;
-  pdfStatus.value = "Preparing printable card list...";
+  pdfStatus.value = "Druckbare Kartenliste wird vorbereitet...";
 
   try {
     const pdfBytes = await generateProxyPdfBytes(resolveResult.value.resolved, {
       layoutMode: layoutMode.value,
       onProgress: (current, total) => {
-        pdfStatus.value = `Embedding card images: ${current}/${total}`;
+        pdfStatus.value = `Kartenbilder werden eingebettet: ${current}/${total}`;
       }
     });
     const timestamp = new Date().toISOString().slice(0, 10);
     const modeSuffix = layoutMode.value === "tight_margin" ? "tight" : "exact";
     downloadPdf(pdfBytes, `manaschmiede-proxies-${modeSuffix}-${timestamp}.pdf`);
-    pdfStatus.value = "PDF generated and download started.";
+    pdfStatus.value = "PDF erzeugt, Download gestartet.";
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown PDF generation error.";
+    const message = error instanceof Error ? error.message : "Unbekannter PDF-Fehler.";
     pdfError.value = message;
   } finally {
     isGeneratingPdf.value = false;
@@ -137,13 +150,13 @@ async function generatePdf(): Promise<void> {
   <main class="app-shell">
     <section class="card">
       <h1>{{ appConfig.name }}</h1>
-      <p>Arena decklist parser + Scryfall resolution + PDF generation (Phase 5, Vue).</p>
+      <p>Erstellt druckbare MTG-Proxy-PDFs aus Arena-Decklisten.</p>
       <p class="meta-line">
-        Version {{ appConfig.version }} | Parsed lines: {{ parsed.entries.length }} | Total cards:
-        {{ parsed.totalCards }} | Diagnostics: {{ parsed.diagnostics.length }}
+        Version {{ appConfig.version }} | Erkannte Zeilen: {{ parsed.entries.length }} |
+        Karten gesamt: {{ parsed.totalCards }} | Hinweise: {{ parsed.diagnostics.length }}
       </p>
 
-      <label for="decklist-input" class="section-title">Arena Decklist</label>
+      <label for="decklist-input" class="section-title">Arena-Deckliste</label>
       <textarea
         id="decklist-input"
         v-model="decklistText"
@@ -151,51 +164,53 @@ async function generatePdf(): Promise<void> {
         spellcheck="false"
       />
 
-      <h2 class="section-title">Options</h2>
+      <h2 class="section-title">Optionen</h2>
       <div id="options-panel" class="options-panel">
         <label class="checkbox-row">
           <input id="include-sideboard" v-model="includeSideboard" type="checkbox">
-          Include sideboard cards
+          Sideboard-Karten einbeziehen
         </label>
 
-        <label for="fallback-mode" class="section-title compact-title">Language fallback mode</label>
+        <label for="fallback-mode" class="section-title compact-title">Sprach-Fallback</label>
         <select id="fallback-mode" v-model="fallbackMode" class="layout-select">
-          <option value="fallback_en">Use English when no German print exists</option>
-          <option value="strict_de">Only allow German prints (strict)</option>
+          <option value="fallback_en">Englisch verwenden, wenn es keinen deutschen Druck gibt</option>
+          <option value="strict_de">Nur deutsche Drucke erlauben</option>
         </select>
 
-        <label for="layout-mode" class="section-title compact-title">PDF layout mode</label>
+        <label for="layout-mode" class="section-title compact-title">PDF-Layout</label>
         <select id="layout-mode" v-model="layoutMode" class="layout-select">
-          <option value="exact_63x88">Exact 63 x 88 mm (recommended)</option>
-          <option value="tight_margin">Tight margins (slightly larger cards)</option>
+          <option value="exact_63x88">Exakt 63 x 88 mm (empfohlen)</option>
+          <option value="tight_margin">Knappe Raender (etwas groessere Karten)</option>
         </select>
 
         <p class="meta-line option-summary">
-          Selected lines for lookup: {{ entriesForLookup.length }} | Selected card quantity:
-          {{ selectedCardTotal }}
+          Fuer die Suche ausgewaehlte Zeilen: {{ entriesForLookup.length }} | Ausgewaehlte
+          Kartenanzahl: {{ selectedCardTotal }}
         </p>
       </div>
 
-      <h2 class="section-title">Parsed Entries</h2>
-      <p v-if="parsed.entries.length === 0" class="empty-state">No valid card lines parsed yet.</p>
+      <h2 class="section-title">Erkannte Eintraege</h2>
+      <p v-if="parsed.entries.length === 0" class="empty-state">
+        Noch keine gueltigen Kartenzeilen erkannt.
+      </p>
       <div v-else class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>Line</th>
-              <th>Use</th>
-              <th>Section</th>
-              <th>Qty</th>
+              <th>Zeile</th>
+              <th>Nutzen</th>
+              <th>Bereich</th>
+              <th>Anzahl</th>
               <th>Name</th>
               <th>Set</th>
-              <th>No.</th>
+              <th>Nr.</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="entry in parsed.entries" :key="`${entry.line}-${entry.name}`">
               <td>{{ entry.line }}</td>
-              <td>{{ includeSideboard || entry.section !== "sideboard" ? "yes" : "no" }}</td>
-              <td>{{ entry.section }}</td>
+              <td>{{ includeSideboard || entry.section !== "sideboard" ? "ja" : "nein" }}</td>
+              <td>{{ sectionLabel(entry.section) }}</td>
               <td>{{ entry.quantity }}</td>
               <td>{{ entry.name }}</td>
               <td>{{ entry.setCode ?? "-" }}</td>
@@ -205,46 +220,46 @@ async function generatePdf(): Promise<void> {
         </table>
       </div>
 
-      <h2 class="section-title">Diagnostics</h2>
-      <p v-if="parsed.diagnostics.length === 0" class="empty-state">No parse errors.</p>
+      <h2 class="section-title">Hinweise</h2>
+      <p v-if="parsed.diagnostics.length === 0" class="empty-state">Keine Parser-Fehler.</p>
       <ul v-else class="diagnostic-list">
         <li v-for="diagnostic in parsed.diagnostics" :key="`${diagnostic.line}-${diagnostic.code}`">
-          <strong>Line {{ diagnostic.line }}:</strong> {{ diagnostic.message }}
+          <strong>Zeile {{ diagnostic.line }}:</strong> {{ diagnostic.message }}
         </li>
       </ul>
 
-      <h2 class="section-title">Scryfall Resolution (Phase 3)</h2>
+      <h2 class="section-title">Scryfall-Aufloesung</h2>
       <button
         id="resolve-scryfall-button"
         class="primary-button"
         :disabled="isResolving || entriesForLookup.length === 0"
         @click="resolveFromScryfall"
       >
-        {{ isResolving ? "Resolving..." : "Resolve Cards via Scryfall" }}
+        {{ isResolving ? "Karten werden aufgeloest..." : "Karten ueber Scryfall aufloesen" }}
       </button>
       <p v-if="isResolving && resolveProgress" class="meta-line">
-        Resolving cards: {{ resolveProgress.current }}/{{ resolveProgress.total }}
+        Karten werden aufgeloest: {{ resolveProgress.current }}/{{ resolveProgress.total }}
       </p>
       <p v-if="resolveError" class="error-text">{{ resolveError }}</p>
       <p v-else-if="resolveResult" class="meta-line">
-        Resolved: {{ resolveResult.resolved.length }} | Unresolved:
-        {{ resolveResult.unresolved.length }} | Fallback to English:
+        Aufgeloest: {{ resolveResult.resolved.length }} | Nicht aufgeloest:
+        {{ resolveResult.unresolved.length }} | Auf Englisch ausgewichen:
         {{ resolveResult.fallbackToEnglishCount }}
       </p>
 
       <div v-if="resolveResult && resolveResult.unresolved.length > 0">
-        <h3 class="section-title">Unresolved Cards</h3>
+        <h3 class="section-title">Nicht aufgeloeste Karten</h3>
         <p v-if="unresolvedSummary" class="meta-line">
-          Unresolved lines: {{ unresolvedSummary.unresolvedLines }} | Unique card names:
-          {{ unresolvedSummary.uniqueCardNames }} | Unresolved quantity:
+          Nicht aufgeloeste Zeilen: {{ unresolvedSummary.unresolvedLines }} | Eindeutige
+          Kartennamen: {{ unresolvedSummary.uniqueCardNames }} | Nicht aufgeloeste Anzahl:
           {{ unresolvedSummary.unresolvedCardQuantity }}
         </p>
         <div v-if="unresolvedSummary" class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Reason</th>
-                <th>Lines</th>
+                <th>Grund</th>
+                <th>Zeilen</th>
               </tr>
             </thead>
             <tbody>
@@ -260,31 +275,31 @@ async function generatePdf(): Promise<void> {
             v-for="unresolved in resolveResult.unresolved"
             :key="`${unresolved.entry.line}-${unresolved.entry.name}`"
           >
-            <strong>Line {{ unresolved.entry.line }} ({{ unresolved.entry.name }}):</strong>
+            <strong>Zeile {{ unresolved.entry.line }} ({{ unresolved.entry.name }}):</strong>
             {{ unresolved.reason }}
           </li>
         </ul>
       </div>
 
-      <h2 class="section-title">PDF Generation (Phase 4)</h2>
+      <h2 class="section-title">PDF-Erzeugung</h2>
       <button
         id="generate-pdf-button"
         class="primary-button"
         :disabled="isGeneratingPdf || !canGeneratePdf"
         @click="generatePdf"
       >
-        {{ isGeneratingPdf ? "Generating PDF..." : "Generate Printable A4 PDF" }}
+        {{ isGeneratingPdf ? "PDF wird erzeugt..." : "Druckbares A4-PDF erzeugen" }}
       </button>
       <p v-if="pdfStatus" class="meta-line">{{ pdfStatus }}</p>
       <p v-if="pdfError" class="error-text">{{ pdfError }}</p>
 
-      <h2 id="print-instructions" class="section-title">Print Instructions</h2>
+      <h2 id="print-instructions" class="section-title">Druckhinweise</h2>
       <ol class="instruction-list">
-        <li>Use A4 paper in portrait orientation.</li>
-        <li>Set print scale to exactly 100%.</li>
-        <li>Disable "fit to page" or "shrink to fit".</li>
-        <li>Use high-quality or photo print mode when available.</li>
-        <li>After cutting, sleeve proxies with a backing card for stiffness.</li>
+        <li>Verwende A4-Papier im Hochformat.</li>
+        <li>Stelle den Druckmassstab exakt auf 100 %.</li>
+        <li>Deaktiviere "An Seite anpassen" oder "Auf Seitengroesse verkleinern".</li>
+        <li>Verwende nach Moeglichkeit hohe Druckqualitaet oder Fotomodus.</li>
+        <li>Stecke die Proxys nach dem Ausschneiden mit einer echten Karte in Huellen.</li>
       </ol>
     </section>
   </main>
