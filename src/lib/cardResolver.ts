@@ -147,7 +147,7 @@ async function resolveSingleEntry(
   return {
     unresolved: {
       entry,
-      reason: "Kein passender Scryfall-Druck fuer die gewaehlte Sprachstrategie gefunden.",
+      reason: "Kein passender Scryfall-Druck für die gewählte Sprachstrategie gefunden.",
       attempts
     },
     usedFallback

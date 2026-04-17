@@ -86,7 +86,7 @@ watch([decklistText, includeSideboard, fallbackMode], () => {
 async function resolveFromScryfall(): Promise<void> {
   if (entriesForLookup.value.length === 0) {
     resolveResult.value = null;
-    resolveError.value = "Keine gueltigen Eintraege fuer die Suche vorhanden.";
+    resolveError.value = "Keine gültigen Einträge für die Suche vorhanden.";
     return;
   }
 
@@ -118,7 +118,7 @@ const canGeneratePdf = computed(
 
 async function generatePdf(): Promise<void> {
   if (!resolveResult.value || resolveResult.value.resolved.length === 0) {
-    pdfError.value = "Loese zuerst Karten auf, bevor du ein PDF erzeugst.";
+    pdfError.value = "Löse zuerst Karten auf, bevor du ein PDF erzeugst.";
     return;
   }
 
@@ -152,6 +152,9 @@ async function generatePdf(): Promise<void> {
       <h1>{{ appConfig.name }}</h1>
       <p>Erstellt druckbare MTG-Proxy-PDFs aus Arena-Decklisten.</p>
       <p class="meta-line">
+        Die Seite ist noch in Arbeit. Funktionen und Darstellung können sich noch ändern.
+      </p>
+      <p class="meta-line">
         Version {{ appConfig.version }} | Erkannte Zeilen: {{ parsed.entries.length }} |
         Karten gesamt: {{ parsed.totalCards }} | Hinweise: {{ parsed.diagnostics.length }}
       </p>
@@ -180,18 +183,18 @@ async function generatePdf(): Promise<void> {
         <label for="layout-mode" class="section-title compact-title">PDF-Layout</label>
         <select id="layout-mode" v-model="layoutMode" class="layout-select">
           <option value="exact_63x88">Exakt 63 x 88 mm (empfohlen)</option>
-          <option value="tight_margin">Knappe Raender (etwas groessere Karten)</option>
+          <option value="tight_margin">Knappe Ränder (etwas größere Karten)</option>
         </select>
 
         <p class="meta-line option-summary">
-          Fuer die Suche ausgewaehlte Zeilen: {{ entriesForLookup.length }} | Ausgewaehlte
+          Für die Suche ausgewählte Zeilen: {{ entriesForLookup.length }} | Ausgewählte
           Kartenanzahl: {{ selectedCardTotal }}
         </p>
       </div>
 
       <h2 class="section-title">Erkannte Eintraege</h2>
       <p v-if="parsed.entries.length === 0" class="empty-state">
-        Noch keine gueltigen Kartenzeilen erkannt.
+        Noch keine gültigen Kartenzeilen erkannt.
       </p>
       <div v-else class="table-wrapper">
         <table>
@@ -228,30 +231,30 @@ async function generatePdf(): Promise<void> {
         </li>
       </ul>
 
-      <h2 class="section-title">Scryfall-Aufloesung</h2>
+      <h2 class="section-title">Scryfall-Auflösung</h2>
       <button
         id="resolve-scryfall-button"
         class="primary-button"
         :disabled="isResolving || entriesForLookup.length === 0"
         @click="resolveFromScryfall"
       >
-        {{ isResolving ? "Karten werden aufgeloest..." : "Karten ueber Scryfall aufloesen" }}
+        {{ isResolving ? "Karten werden aufgelöst..." : "Karten über Scryfall auflösen" }}
       </button>
       <p v-if="isResolving && resolveProgress" class="meta-line">
-        Karten werden aufgeloest: {{ resolveProgress.current }}/{{ resolveProgress.total }}
+        Karten werden aufgelöst: {{ resolveProgress.current }}/{{ resolveProgress.total }}
       </p>
       <p v-if="resolveError" class="error-text">{{ resolveError }}</p>
       <p v-else-if="resolveResult" class="meta-line">
-        Aufgeloest: {{ resolveResult.resolved.length }} | Nicht aufgeloest:
+        Aufgelöst: {{ resolveResult.resolved.length }} | Nicht aufgelöst:
         {{ resolveResult.unresolved.length }} | Auf Englisch ausgewichen:
         {{ resolveResult.fallbackToEnglishCount }}
       </p>
 
       <div v-if="resolveResult && resolveResult.unresolved.length > 0">
-        <h3 class="section-title">Nicht aufgeloeste Karten</h3>
+        <h3 class="section-title">Nicht aufgelöste Karten</h3>
         <p v-if="unresolvedSummary" class="meta-line">
-          Nicht aufgeloeste Zeilen: {{ unresolvedSummary.unresolvedLines }} | Eindeutige
-          Kartennamen: {{ unresolvedSummary.uniqueCardNames }} | Nicht aufgeloeste Anzahl:
+          Nicht aufgelöste Zeilen: {{ unresolvedSummary.unresolvedLines }} | Eindeutige
+          Kartennamen: {{ unresolvedSummary.uniqueCardNames }} | Nicht aufgelöste Anzahl:
           {{ unresolvedSummary.unresolvedCardQuantity }}
         </p>
         <div v-if="unresolvedSummary" class="table-wrapper">
@@ -296,10 +299,10 @@ async function generatePdf(): Promise<void> {
       <h2 id="print-instructions" class="section-title">Druckhinweise</h2>
       <ol class="instruction-list">
         <li>Verwende A4-Papier im Hochformat.</li>
-        <li>Stelle den Druckmassstab exakt auf 100 %.</li>
-        <li>Deaktiviere "An Seite anpassen" oder "Auf Seitengroesse verkleinern".</li>
-        <li>Verwende nach Moeglichkeit hohe Druckqualitaet oder Fotomodus.</li>
-        <li>Stecke die Proxys nach dem Ausschneiden mit einer echten Karte in Huellen.</li>
+        <li>Stelle den Druckmaßstab exakt auf 100 %.</li>
+        <li>Deaktiviere "An Seite anpassen" oder "Auf Seitengröße verkleinern".</li>
+        <li>Verwende nach Möglichkeit hohe Druckqualität oder Fotomodus.</li>
+        <li>Stecke die Proxys nach dem Ausschneiden mit einer echten Karte in Hüllen.</li>
       </ol>
     </section>
   </main>

@@ -43,7 +43,7 @@ export function createNineUpLayout(mode: LayoutMode): NineUpLayoutMm {
       : {
           cardWidthMm: 63,
           cardHeightMm: 88,
-          gapMm: 1.5
+          gapMm: 0
         };
 
   const usedWidthMm = settings.cardWidthMm * COLUMNS + settings.gapMm * (COLUMNS - 1);
@@ -81,4 +81,3 @@ export function createNineUpLayout(mode: LayoutMode): NineUpLayoutMm {
     slots
   };
 }
-

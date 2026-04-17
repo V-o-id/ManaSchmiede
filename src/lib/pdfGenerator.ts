@@ -99,7 +99,7 @@ export async function generateProxyPdfBytes(
 ): Promise<Uint8Array> {
   const printableItems = buildPrintableImageList(resolvedCards);
   if (printableItems.length === 0) {
-    throw new Error("Keine druckbaren Bilder fuer die PDF-Erzeugung verfuegbar.");
+    throw new Error("Keine druckbaren Bilder für die PDF-Erzeugung verfügbar.");
   }
 
   const layout = createNineUpLayout(options.layoutMode ?? DEFAULT_LAYOUT_MODE);

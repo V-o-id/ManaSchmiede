@@ -5,10 +5,11 @@ describe("pdf layout", () => {
     const layout = createNineUpLayout("exact_63x88");
 
     expect(layout.slots).toHaveLength(9);
-    expect(layout.marginXmm).toBeCloseTo(9, 6);
-    expect(layout.marginYmm).toBeCloseTo(15, 6);
-    expect(layout.slots[0].xMm).toBeCloseTo(9, 6);
-    expect(layout.slots[0].yMm).toBeCloseTo(15, 6);
+    expect(layout.gapMm).toBe(0);
+    expect(layout.marginXmm).toBeCloseTo(10.5, 6);
+    expect(layout.marginYmm).toBeCloseTo(16.5, 6);
+    expect(layout.slots[0].xMm).toBeCloseTo(10.5, 6);
+    expect(layout.slots[0].yMm).toBeCloseTo(16.5, 6);
   });
 
   it("creates positive margins for tight mode", () => {
@@ -21,4 +22,3 @@ describe("pdf layout", () => {
     expect(mmToPt(25.4)).toBeCloseTo(72, 6);
   });
 });
-

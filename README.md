@@ -2,19 +2,21 @@
 
 ManaSchmiede ist ein Webtool zum Erstellen von druckbaren Magic: The Gathering Proxy-PDFs aus Arena-Decklisten.
 
+Die Seite ist noch in Arbeit. Funktionen, Texte und Layout können sich noch ändern.
+
 Die Anwendung:
 - liest eine Arena-Deckliste ein,
-- sucht passende Kartendrucke ueber Scryfall,
+- sucht passende Kartendrucke über Scryfall,
 - bevorzugt deutsche Karten und kann optional auf Englisch ausweichen,
 - erstellt ein druckbares A4-PDF mit 3x3 Karten pro Seite.
 
 ## Nutzung
 
-1. Fuege eine Arena-Deckliste in das Eingabefeld ein.
-2. Waehle, ob das Sideboard einbezogen werden soll.
-3. Waehle, ob bei fehlenden deutschen Drucken auf Englisch ausgewichen werden darf.
-4. Waehle den PDF-Modus.
-5. Klicke auf `Karten ueber Scryfall aufloesen`.
+1. Füge eine Arena-Deckliste in das Eingabefeld ein.
+2. Wähle, ob das Sideboard einbezogen werden soll.
+3. Wähle, ob bei fehlenden deutschen Drucken auf Englisch ausgewichen werden darf.
+4. Wähle den PDF-Modus.
+5. Klicke auf `Karten über Scryfall auflösen`.
 6. Klicke danach auf `Druckbares A4-PDF erzeugen`.
 
 ## Lokal starten
@@ -26,4 +28,4 @@ Voraussetzung: Node.js 20+.
 
 ## GitHub Pages
 
-Das Projekt ist fuer GitHub Pages unter `https://v-o-id.github.io/ManaSchmiede/` vorbereitet.
+Das Projekt ist für GitHub Pages unter `https://v-o-id.github.io/ManaSchmiede/` vorbereitet.
