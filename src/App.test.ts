@@ -34,4 +34,11 @@ describe("App", () => {
     const wrapper = mount(App);
     expect(wrapper.find("#print-instructions").exists()).toBe(true);
   });
+
+  it("renders set import controls", () => {
+    const wrapper = mount(App);
+    expect(wrapper.find("#set-input").exists()).toBe(true);
+    expect(wrapper.find("#import-set-button").exists()).toBe(true);
+    expect(wrapper.find("#generate-set-pdf-button").exists()).toBe(true);
+  });
 });

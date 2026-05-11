@@ -63,6 +63,37 @@ describe("ScryfallClient", () => {
     );
   });
 
+  it("loads all pages for set searches", async () => {
+    const fetchFn = vi
+      .fn()
+      .mockResolvedValueOnce(
+        createResponse({
+          object: "list",
+          has_more: true,
+          next_page: "https://api.scryfall.com/cards/search?page=2",
+          data: [createCard({ id: "first" })]
+        })
+      )
+      .mockResolvedValueOnce(
+        createResponse({
+          object: "list",
+          has_more: false,
+          data: [createCard({ id: "second" })]
+        })
+      );
+    const client = new ScryfallClient({ fetchFn, minDelayMs: 0 });
+
+    const cards = await client.searchCardsBySetCode("LTR", "de");
+
+    expect(cards.map((card) => card.id)).toEqual(["first", "second"]);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(fetchFn).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("q=e%3Altr+lang%3Ade+game%3Apaper"),
+      expect.any(Object)
+    );
+  });
+
   it("binds global fetch to the runtime object when no custom fetchFn is provided", async () => {
     const originalFetch = globalThis.fetch;
     const mockFetch = vi.fn(function (this: unknown) {

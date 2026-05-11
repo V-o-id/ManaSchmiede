@@ -5,6 +5,7 @@ import { parseArenaDecklist, type DeckSection } from "./lib/decklistParser";
 import { resolveDeckEntries, type ResolveDeckResult } from "./lib/cardResolver";
 import { ScryfallClient } from "./lib/scryfallClient";
 import { downloadPdf, generateProxyPdfBytes } from "./lib/pdfGenerator";
+import { importScryfallSet, type SetImportResult } from "./lib/setImporter";
 import type { LayoutMode } from "./lib/pdfLayout";
 
 const exampleDecklist = `Deck
@@ -28,6 +29,11 @@ const layoutMode = ref<LayoutMode>("exact_63x88");
 const isGeneratingPdf = ref(false);
 const pdfStatus = ref<string | null>(null);
 const pdfError = ref<string | null>(null);
+const setInput = ref("https://scryfall.com/sets/ltr");
+const setImportResult = ref<SetImportResult | null>(null);
+const isImportingSet = ref(false);
+const setImportStatus = ref<string | null>(null);
+const setImportError = ref<string | null>(null);
 
 function sectionLabel(section: DeckSection): string {
   switch (section) {
@@ -79,8 +85,20 @@ function resetResolveAndPdfState(): void {
   pdfError.value = null;
 }
 
+function resetSetImportState(): void {
+  setImportResult.value = null;
+  setImportStatus.value = null;
+  setImportError.value = null;
+  pdfStatus.value = null;
+  pdfError.value = null;
+}
+
 watch([decklistText, includeSideboard, fallbackMode], () => {
   resetResolveAndPdfState();
+});
+
+watch([setInput, fallbackMode], () => {
+  resetSetImportState();
 });
 
 async function resolveFromScryfall(): Promise<void> {
@@ -144,6 +162,56 @@ async function generatePdf(): Promise<void> {
     isGeneratingPdf.value = false;
   }
 }
+
+async function importSetFromScryfall(): Promise<void> {
+  isImportingSet.value = true;
+  setImportError.value = null;
+  setImportStatus.value = "Set wird von Scryfall geladen...";
+
+  try {
+    setImportResult.value = await importScryfallSet(setInput.value, {
+      client: scryfallClient,
+      preferredLanguage: "de",
+      fallbackLanguage: "en",
+      fallbackMode: fallbackMode.value
+    });
+    setImportStatus.value = `${setImportResult.value.resolved.length} Karten aus ${setImportResult.value.setCode.toUpperCase()} geladen.`;
+  } catch (error) {
+    setImportResult.value = null;
+    setImportError.value = error instanceof Error ? error.message : "Unbekannter Set-Import-Fehler.";
+    setImportStatus.value = null;
+  } finally {
+    isImportingSet.value = false;
+  }
+}
+
+async function generateSetPdf(): Promise<void> {
+  if (!setImportResult.value || setImportResult.value.resolved.length === 0) {
+    pdfError.value = "Lade zuerst ein Set, bevor du ein PDF erzeugst.";
+    return;
+  }
+
+  isGeneratingPdf.value = true;
+  pdfError.value = null;
+  pdfStatus.value = "Druckbare Set-Liste wird vorbereitet...";
+
+  try {
+    const pdfBytes = await generateProxyPdfBytes(setImportResult.value.resolved, {
+      layoutMode: layoutMode.value,
+      onProgress: (current, total) => {
+        pdfStatus.value = `Kartenbilder werden eingebettet: ${current}/${total}`;
+      }
+    });
+    const timestamp = new Date().toISOString().slice(0, 10);
+    downloadPdf(pdfBytes, `manaschmiede-set-${setImportResult.value.setCode}-${timestamp}.pdf`);
+    pdfStatus.value = "Set-PDF erzeugt, Download gestartet.";
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unbekannter PDF-Fehler.";
+    pdfError.value = message;
+  } finally {
+    isGeneratingPdf.value = false;
+  }
+}
 </script>
 
 <template>
@@ -153,6 +221,11 @@ async function generatePdf(): Promise<void> {
       <p>Erstellt druckbare MTG-Proxy-PDFs aus Arena-Decklisten.</p>
       <p class="meta-line">
         Die Seite ist noch in Arbeit. Funktionen und Darstellung können sich noch ändern.
+      </p>
+      <p class="meta-line">
+        Hinweis: ManaSchmiede ist als privates Hilfsmittel für Proxys, Tests und Deckplanung gedacht.
+        Die Anwendung soll weder Urheberrechtsverletzungen noch den Verzicht auf den Kauf offizieller
+        Karten fördern.
       </p>
       <p class="meta-line">
         Version {{ appConfig.version }} | Erkannte Zeilen: {{ parsed.entries.length }} |
@@ -295,6 +368,42 @@ async function generatePdf(): Promise<void> {
       </button>
       <p v-if="pdfStatus" class="meta-line">{{ pdfStatus }}</p>
       <p v-if="pdfError" class="error-text">{{ pdfError }}</p>
+
+      <h2 class="section-title">Komplettes Set importieren</h2>
+      <p class="meta-line">
+        Gib einen Scryfall-Set-Link oder Set-Code ein, zum Beispiel
+        <code>https://scryfall.com/sets/ltr</code> oder <code>ltr</code>.
+      </p>
+      <label for="set-input" class="section-title compact-title">Scryfall-Set</label>
+      <input
+        id="set-input"
+        v-model="setInput"
+        class="text-input"
+        spellcheck="false"
+        type="text"
+      >
+      <button
+        id="import-set-button"
+        class="primary-button spaced-button"
+        :disabled="isImportingSet"
+        @click="importSetFromScryfall"
+      >
+        {{ isImportingSet ? "Set wird geladen..." : "Set über Scryfall laden" }}
+      </button>
+      <p v-if="setImportStatus" class="meta-line">{{ setImportStatus }}</p>
+      <p v-if="setImportError" class="error-text">{{ setImportError }}</p>
+      <p v-if="setImportResult" class="meta-line">
+        Deutsch: {{ setImportResult.preferredCount }} | Englisch-Fallback:
+        {{ setImportResult.fallbackCount }}
+      </p>
+      <button
+        id="generate-set-pdf-button"
+        class="primary-button"
+        :disabled="isGeneratingPdf || !setImportResult || setImportResult.resolved.length === 0"
+        @click="generateSetPdf"
+      >
+        {{ isGeneratingPdf ? "PDF wird erzeugt..." : "Set als A4-PDF erzeugen" }}
+      </button>
 
       <h2 id="print-instructions" class="section-title">Druckhinweise</h2>
       <ol class="instruction-list">

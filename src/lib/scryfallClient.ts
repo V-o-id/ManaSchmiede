@@ -82,6 +82,32 @@ export class ScryfallClient {
     return result.data[0] ?? null;
   }
 
+  async searchCardsBySetCode(setCode: string, language: string): Promise<ScryfallCard[]> {
+    const query = `e:${setCode.toLowerCase()} lang:${language.toLowerCase()} game:paper`;
+    const params = new URLSearchParams({
+      q: query,
+      unique: "prints",
+      order: "set"
+    });
+    const cards: ScryfallCard[] = [];
+    let nextPath: string | null = `/cards/search?${params.toString()}`;
+
+    while (nextPath) {
+      const result: ScryfallList<ScryfallCard> = await this.getJson<ScryfallList<ScryfallCard>>(nextPath);
+      cards.push(...result.data);
+      nextPath = result.has_more && result.next_page ? this.pathFromUrl(result.next_page) : null;
+    }
+
+    return cards;
+  }
+
+  private pathFromUrl(url: string): string {
+    if (url.startsWith(this.baseUrl)) {
+      return url.slice(this.baseUrl.length);
+    }
+    return url;
+  }
+
   private async getJson<T>(pathWithQuery: string): Promise<T> {
     const url = `${this.baseUrl}${pathWithQuery}`;
     const cacheKey = `GET:${url}`;

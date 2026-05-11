@@ -1,5 +1,5 @@
 const DEFAULT_APP_NAME = "ManaSchmiede";
-const DEFAULT_APP_VERSION = "0.1.0-dev";
+const DEFAULT_APP_VERSION = "0.2.0-dev";
 const DEFAULT_REPOSITORY_URL = "https://github.com/V-o-id/ManaSchmiede";
 
 function resolveScryfallUserAgent(appName: string, appVersion: string, repositoryUrl: string): string {

@@ -27,6 +27,8 @@ export interface ScryfallList<T> {
   object: "list";
   has_more: boolean;
   data: T[];
+  next_page?: string;
+  total_cards?: number;
 }
 
 export interface ScryfallErrorResponse {
@@ -35,4 +37,3 @@ export interface ScryfallErrorResponse {
   code: string;
   details: string;
 }
-
